@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { usePublicNewsList, usePublicFeaturedNews, usePublicNewsCategories } from "@/hooks/api/usePublicNews";
 import CommunityPostCard from "@/components/public/CommunityPostCard";
 import {
@@ -61,93 +62,99 @@ export default function CommunityPage() {
   return (
     <>
       {/* ── Hero ── */}
-      <section className="nv-hero pt-24 pb-28">
-        <div className="absolute left-1/3 top-10 h-80 w-80 rounded-full bg-[rgba(193,207,184,0.16)] blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/3 h-72 w-72 rounded-full bg-[rgba(192,155,108,0.14)] blur-3xl animate-pulse [animation-delay:0.8s]" />
+      <section className="relative w-full -mt-[80px] pt-[160px] pb-24 border-b-8 border-emerald-700 bg-emerald-900 overflow-hidden">
+        {/* Background Image & Overlay */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/carousel/carousel-02.png"
+            alt="Đồng lúa xanh Nam Việt"
+            fill
+            className="object-cover"
+            priority
+          />
+          {/* Lớp phủ nhạt hơn để nhìn rõ cảnh quang */}
+          <div className="absolute inset-0 bg-emerald-900/30 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/90 via-black/20 to-transparent" />
+          
+          {/* MỚI: Lớp bọc sáng rực ở ĐỈNH TRANG để cứu Header màu đen */}
+          <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-white/95 via-white/80 to-transparent" />
+        </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="nv-soft-badge mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium backdrop-blur-sm">
-            <Users size={14} />
-            Cộng đồng Nam Việt
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-4 leading-tight">
-            Tin tức &amp;{" "}
-            <span className="bg-gradient-to-r from-[#f4ead9] via-[#d8e3d4] to-[#c6a173] bg-clip-text text-transparent">
-              Cộng đồng
-            </span>
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-white mb-5 leading-tight drop-shadow-md">
+            Tin Tức & Cộng Đồng
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-[#d6dbd2]">
-            Cập nhật thông tin mới nhất, chia sẻ kiến thức và kết nối cùng cộng đồng Nam Việt.
+          <p className="mx-auto mb-14 max-w-2xl text-base md:text-lg font-medium text-emerald-50 leading-relaxed drop-shadow-sm">
+            Nơi kết nối, chia sẻ kiến thức Nông nghiệp xanh và cập nhật thông tin mới nhất mỗi ngày.
           </p>
+        </div>
+      </section>
 
-          {/* Search */}
-          <div className="max-w-xl mx-auto">
-            <div className="nv-hero-panel flex items-center gap-3 rounded-[28px] p-2 backdrop-blur-xl">
-              <Search size={18} className="ml-2 shrink-0 text-[#c7cfca]" />
+      {/* ── Bảng Điều Khiển (Search + Tabs) ── */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8 md:mt-12 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-4 lg:p-5">
+          
+          {/* Hàng 1: Khung Tìm Kiếm */}
+          <div className="mb-5 lg:mb-6">
+            <div className="flex items-center gap-2 bg-slate-50 rounded-xl p-1.5 md:p-2 shadow-inner border border-slate-200 transition-all focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/20">
+              <Search size={20} className="ml-3 shrink-0 text-slate-400" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Tìm kiếm bài viết..."
-                className="flex-1 bg-transparent py-1 text-sm text-white outline-none placeholder:text-[#c7cfca]"
+                placeholder="Nhập từ khóa tìm kiếm (VD: năng suất, hoa sinh...)"
+                className="flex-1 bg-transparent py-1.5 px-2 text-sm md:text-base font-semibold text-slate-800 outline-none placeholder:text-slate-400"
                 id="community-search"
               />
               {search && (
-                <button onClick={() => setSearch("")} className="p-1 text-[#c7cfca] hover:text-white">
-                  <X size={15} />
+                <button onClick={() => setSearch("")} className="p-1.5 mr-1 rounded-lg bg-slate-200 text-slate-600 hover:bg-red-100 hover:text-red-700 transition-colors">
+                  <X size={18} />
                 </button>
               )}
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-[#d0d8d0]">
-            <span className="flex items-center gap-1.5"><Eye size={14} className="text-[#d7c2a1]" /> {(meta?.total || 0).toLocaleString()} bài viết</span>
-            <span className="flex items-center gap-1.5"><MessageCircle size={14} className="text-[#d8e2d5]" /> Cộng đồng sôi động</span>
-            <span className="flex items-center gap-1.5"><TrendingUp size={14} className="text-[#bfcdb7]" /> Cập nhật hàng ngày</span>
+          {/* Hàng 2: Tabs Phân loại */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.value}
+                  onClick={() => setActiveTab(tab.value)}
+                  className={`flex items-center justify-center flex-1 lg:flex-none gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 border ${
+                    activeTab === tab.value
+                      ? "bg-emerald-700 text-white border-emerald-700 shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Lọc danh mục */}
+            {categories.length > 0 && (
+              <div className="w-full lg:w-auto shrink-0">
+                <select
+                  onChange={(e) => {
+                    // filter by category
+                  }}
+                  className="w-full lg:w-56 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/10 cursor-pointer hover:border-emerald-400 transition-colors"
+                >
+                  <option value="">Tất cả danh mục</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.categoryName}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         </div>
-      </section>
-
-      {/* ── Tabs & Main ── */}
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        {/* Tabs */}
-        <div className="nv-soft-card mb-8 flex items-center gap-2 overflow-x-auto rounded-[28px] p-3 no-scrollbar">
-          {TABS.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setActiveTab(tab.value)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                activeTab === tab.value
-                  ? "nv-primary-button text-white"
-                  : "border border-[var(--nv-border)] bg-[rgba(255,255,255,0.82)] text-[var(--nv-muted)] hover:border-[rgba(80,102,82,0.18)] hover:text-[var(--nv-sage-strong)]"
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
-
-          {/* Category filter */}
-          {categories.length > 0 && (
-            <div className="ml-auto shrink-0">
-              <select
-                onChange={(e) => {
-                  // filter by category – could extend queryParams
-                }}
-                className="rounded-xl border border-[var(--nv-border)] bg-[rgba(255,255,255,0.88)] px-3 py-2 text-sm text-[var(--nv-ink)] outline-none focus:ring-4 focus:ring-[rgba(113,136,111,0.12)]"
-              >
-                <option value="">Tất cả danh mục</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.categoryName}</option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
+      </div>
 
         {/* 3-column layout */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-24">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Feed */}
           <div className="lg:col-span-3">
@@ -183,25 +190,25 @@ export default function CommunityPage() {
                   ))}
                 </div>
 
-                {/* Pagination */}
+                {/* Phân trang */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-10">
+                  <div className="flex items-center justify-center gap-2 mt-8 mb-6">
                     <button
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page <= 1}
-                      className="nv-outline-button flex items-center gap-1 rounded-2xl px-3 py-2 text-sm text-[var(--nv-muted)] transition-all disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition-all hover:border-emerald-600 hover:text-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-300 disabled:border-slate-100 shrink-0"
                     >
-                      <ChevronLeft size={15} /> Trước
+                      <ChevronLeft size={16} /> Lùi lại
                     </button>
-                    <span className="px-3 text-sm text-[var(--nv-muted)]">
-                      {page} / {totalPages}
+                    <span className="px-2 py-1 rounded bg-slate-100 text-sm font-bold text-slate-800 border">
+                      Trang {page} / {totalPages}
                     </span>
                     <button
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page >= totalPages}
-                      className="nv-outline-button flex items-center gap-1 rounded-2xl px-3 py-2 text-sm text-[var(--nv-muted)] transition-all disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition-all hover:border-emerald-600 hover:text-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-300 disabled:border-slate-100 shrink-0"
                     >
-                      Sau <ChevronRight size={15} />
+                      Xem tiếp <ChevronRight size={16} />
                     </button>
                   </div>
                 )}

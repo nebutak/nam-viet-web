@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Eye, Heart, MessageCircle, Clock, Video, Star } from "lucide-react";
+import { Clock, Video, Star, ChevronRight } from "lucide-react";
 import type { News } from "@/hooks/api/useNews";
 
 const API_BASE = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5000";
@@ -13,11 +13,6 @@ function formatDate(dateStr: string) {
     month: "2-digit",
     year: "numeric",
   });
-}
-
-function formatCount(n: number) {
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return n.toString();
 }
 
 function getImageUrl(path?: string) {
@@ -37,21 +32,23 @@ export default function CommunityPostCard({ post, variant = "default" }: Communi
 
   if (variant === "compact") {
     return (
-      <Link href={`/community/${post.slug}`} className="group flex gap-3 rounded-2xl p-3 transition-all duration-200 hover:bg-[rgba(113,136,111,0.08)]">
-        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[#e8e4da]">
+      <Link href={`/community/${post.slug}`} className="group flex gap-4 rounded-[20px] p-3 transition-colors hover:bg-slate-50 border border-transparent hover:border-slate-200">
+        <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-[14px] bg-slate-100 border border-slate-200">
           {imageUrl ? (
-            <Image src={imageUrl} alt={post.title} fill className="object-cover" sizes="64px" />
+            <Image src={imageUrl} alt={post.title} fill className="object-cover" sizes="96px" />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
-              <MessageCircle size={20} className="text-slate-400" />
+              <Star size={24} className="text-slate-300" />
             </div>
           )}
         </div>
-        <div className="min-w-0">
-          <p className="line-clamp-2 text-sm font-medium text-[var(--nv-ink)] transition-colors group-hover:text-[var(--nv-sage-strong)]">
+        <div className="min-w-0 flex flex-col justify-center">
+          <p className="line-clamp-2 text-base font-bold text-slate-900 group-hover:text-emerald-700 leading-snug">
             {post.title}
           </p>
-          <p className="mt-1 text-xs text-[var(--nv-muted)]">{formatDate(post.createdAt)}</p>
+          <p className="mt-1.5 text-sm font-medium text-slate-500 flex items-center gap-1.5">
+            <Clock size={14} /> {formatDate(post.createdAt)}
+          </p>
         </div>
       </Link>
     );
@@ -59,46 +56,47 @@ export default function CommunityPostCard({ post, variant = "default" }: Communi
 
   if (variant === "featured") {
     return (
-      <Link href={`/community/${post.slug}`} className="group block relative aspect-[16/9] overflow-hidden rounded-[30px] shadow-[0_24px_70px_rgba(24,35,30,0.2)]">
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,#1f312b_0%,#375145_54%,#6c816d_100%)]" />
+      <Link href={`/community/${post.slug}`} className="group block relative aspect-[16/9] md:aspect-[21/9] overflow-hidden rounded-[32px] border border-slate-200 shadow-sm">
+        <div className="absolute inset-0 bg-slate-800" />
         {imageUrl && (
           <Image
             src={imageUrl}
             alt={post.title}
             fill
-            className="object-cover opacity-45 transition-all duration-700 group-hover:scale-105 group-hover:opacity-55"
-            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover opacity-60 transition-transform duration-700 ease-out group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 80vw"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-        <div className="absolute inset-0 p-6 flex flex-col justify-end">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="rounded-full border border-white/12 bg-[rgba(245,239,228,0.18)] px-2.5 py-1 text-[11px] font-semibold text-[#f6efe2] backdrop-blur-sm">
-              {post.category?.categoryName}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="rounded-xl bg-white px-3 py-1 text-sm font-bold text-emerald-800 shadow-sm">
+              {post.category?.categoryName || "Tin tức"}
             </span>
             {isVideo && (
-              <span className="flex items-center gap-1 rounded-full bg-red-500/75 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
-                <Video size={11} /> Video
+              <span className="flex items-center gap-1 rounded-xl bg-red-600 px-3 py-1 text-sm font-bold text-white shadow-sm">
+                <Video size={14} /> Video
               </span>
             )}
             {post.isFeatured && (
-              <span className="flex items-center gap-1 rounded-full bg-[rgba(192,155,108,0.82)] px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
-                <Star size={11} className="fill-white" /> Nổi bật
+              <span className="flex items-center gap-1 rounded-xl bg-amber-500 px-3 py-1 text-sm font-bold text-white shadow-sm">
+                <Star size={14} className="fill-white" /> Nổi bật
               </span>
             )}
+            <span className="flex items-center gap-1.5 ml-auto text-sm font-medium text-slate-200 bg-black/40 px-3 py-1 rounded-xl backdrop-blur-md">
+              <Clock size={14} /> {formatDate(post.createdAt)}
+            </span>
           </div>
-          <h3 className="line-clamp-2 text-lg font-bold leading-snug text-white transition-colors group-hover:text-[#f4ead9]">
+          
+          <h3 className="line-clamp-2 text-xl md:text-2xl font-bold leading-tight text-white mb-3 group-hover:text-emerald-100 transition-colors">
             {post.title}
           </h3>
+          
           {post.excerpt && (
-            <p className="text-slate-300 text-sm mt-2 line-clamp-2 hidden sm:block">{post.excerpt}</p>
+            <p className="text-slate-200 text-sm md:text-base line-clamp-2 max-w-4xl font-medium leading-relaxed">
+              {post.excerpt}
+            </p>
           )}
-          <div className="flex items-center gap-4 mt-4 text-slate-300 text-xs">
-            <span className="flex items-center gap-1"><Eye size={13} />{formatCount(post.viewCount)}</span>
-            <span className="flex items-center gap-1"><Heart size={13} />{formatCount(post.likeCount)}</span>
-            <span className="flex items-center gap-1"><MessageCircle size={13} />{formatCount(post.commentCount)}</span>
-            <span className="flex items-center gap-1 ml-auto"><Clock size={13} />{formatDate(post.createdAt)}</span>
-          </div>
         </div>
       </Link>
     );
@@ -106,92 +104,74 @@ export default function CommunityPostCard({ post, variant = "default" }: Communi
 
   // Default card
   return (
-    <Link href={`/community/${post.slug}`} className="group block">
-      <div className="nv-soft-card overflow-hidden rounded-[28px] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_24px_54px_rgba(32,48,40,0.12)]">
-        {/* Image */}
-        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[#f2ece1] via-[#ebe6db] to-[#d6e2d2]">
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={post.title}
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[rgba(113,136,111,0.12)]">
-                {isVideo ? (
-                  <Video size={28} className="text-[var(--nv-sage-strong)]" />
-                ) : (
-                  <MessageCircle size={28} className="text-[var(--nv-sage-strong)]" />
-                )}
-              </div>
+    <Link href={`/community/${post.slug}`} className="group flex flex-col h-full overflow-hidden rounded-[32px] bg-white border border-slate-200 shadow-sm transition-all hover:shadow-xl hover:border-emerald-200">
+      {/* Image */}
+      <div className="relative h-56 w-full overflow-hidden bg-slate-100 border-b border-slate-100">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={post.title}
+            fill
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-200">
+              {isVideo ? (
+                <Video size={36} className="text-slate-400" />
+              ) : (
+                <Star size={36} className="text-slate-400" />
+              )}
             </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex gap-1.5">
-            {isVideo && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-semibold">
-                <Video size={10} /> Video
-              </span>
-            )}
-            {post.isFeatured && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400 text-white text-[10px] font-semibold">
-                <Star size={10} className="fill-white" /> Nổi bật
-              </span>
-            )}
           </div>
+        )}
+
+        {/* Badges Overlay */}
+        <div className="absolute top-4 left-4 flex gap-2">
+          {isVideo && (
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600 shadow-md text-white text-sm font-bold tracking-wide">
+              <Video size={14} /> Video
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-col flex-1 p-6 md:p-8">
+        <div className="flex justify-between items-center mb-4">
+          <span className="inline-block rounded-lg bg-emerald-50 px-3 py-1 text-sm font-bold uppercase tracking-widest text-emerald-800 border border-emerald-100/50">
+            {post.category?.categoryName || "Tin tức"}
+          </span>
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-500">
+            <Clock size={14} />
+            {formatDate(post.createdAt)}
+          </span>
         </div>
 
-        {/* Content */}
-        <div className="p-4">
-          {/* Category + Date */}
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--nv-sage)]">
-              {post.category?.categoryName}
-            </span>
-            <span className="flex items-center gap-1 text-[11px] text-[var(--nv-muted)]">
-              <Clock size={11} />
-              {formatDate(post.createdAt)}
-            </span>
-          </div>
+        <h3 className="mb-3 text-base md:text-lg font-bold leading-snug text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-3">
+          {post.title}
+        </h3>
 
-          {/* Title */}
-          <h3 className="mb-2 text-sm font-semibold leading-snug text-[var(--nv-ink)] transition-colors line-clamp-2 group-hover:text-[var(--nv-sage-strong)]">
-            {post.title}
-          </h3>
+        {post.excerpt && (
+          <p className="line-clamp-2 text-sm text-slate-600 mb-6 leading-relaxed flex-1">
+            {post.excerpt}
+          </p>
+        )}
 
-          {/* Excerpt */}
-          {post.excerpt && (
-            <p className="mb-4 line-clamp-2 text-xs text-[var(--nv-muted)]">
-              {post.excerpt}
-            </p>
+        <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-5">
+          {post.author ? (
+            <span className="text-sm font-bold text-slate-700">
+              Đăng bởi: <span className="text-emerald-700">{post.author.fullName}</span>
+            </span>
+          ) : (
+            <span className="text-sm font-bold text-slate-500">Ban biên tập</span>
           )}
-
-          {/* Stats */}
-          <div className="flex items-center gap-3 border-t border-[rgba(52,67,55,0.08)] pt-3 text-xs text-[var(--nv-muted)]">
-            <span className="flex cursor-pointer items-center gap-1 transition-colors hover:text-[var(--nv-sage-strong)]">
-              <Eye size={13} /> {formatCount(post.viewCount)}
-            </span>
-            <span className="flex cursor-pointer items-center gap-1 transition-colors hover:text-red-500">
-              <Heart size={13} /> {formatCount(post.likeCount)}
-            </span>
-            <span className="flex cursor-pointer items-center gap-1 transition-colors hover:text-[#507a74]">
-              <MessageCircle size={13} /> {formatCount(post.commentCount)}
-            </span>
-            {post.author && (
-              <span className="ml-auto max-w-[100px] truncate text-[var(--nv-muted)]">
-                {post.author.fullName}
-              </span>
-            )}
+          
+          <div className="flex items-center gap-1 text-sm font-bold text-emerald-600 group-hover:translate-x-1 transition-transform">
+            Xem ngay <ChevronRight size={16} />
           </div>
         </div>
-
-        {/* Bottom accent */}
-        <div className="nv-accent-line h-0.5 scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100" />
       </div>
     </Link>
   );

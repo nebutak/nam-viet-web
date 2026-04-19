@@ -1,4 +1,4 @@
-import { Nunito } from 'next/font/google';
+import { Nunito, Playfair_Display, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 
 // import { AuthProvider } from '@/components/providers/AuthProvider';
@@ -8,6 +8,18 @@ import { Toaster } from 'react-hot-toast';
 
 const nunito = Nunito({
   subsets: ["latin", "vietnamese"],
+  variable: '--font-nunito',
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin", "vietnamese"],
+  variable: '--font-playfair',
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin", "vietnamese"],
+  variable: '--font-cormorant',
+  weight: ['300', '400', '500', '600', '700'],
 });
 
 export const metadata = {
@@ -61,7 +73,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
-      <body className={`${nunito.className} bg-white`}>
+      <body className={`${nunito.variable} ${playfair.variable} ${cormorant.variable} font-sans bg-white`}>
         {/* ✅ AuthProvider MUST wrap everything */}
         {/* Removed AuthProvider since authentication is no longer used */}
           <QueryProvider>

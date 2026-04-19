@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ShoppingCart, Star, Tag, Package, Eye } from "lucide-react";
 import type { Product } from "@/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || "http://localhost:8000";
 
 function formatPrice(price: number | string | null | undefined) {
   if (!price) return "Liên hệ";
@@ -48,96 +48,75 @@ export default function ProductCard({ product }: ProductCardProps) {
   const isActive = product.status === "active";
 
   return (
-    <Link href={`/showcase/${product.id}`} className="group block">
-      <div className="nv-soft-card relative overflow-hidden rounded-[28px] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_24px_54px_rgba(32,48,40,0.12)]">
-        {/* Image */}
-        <div className="relative h-52 overflow-hidden bg-gradient-to-br from-[#ebe6db] via-[#f5f0e7] to-[#dbe5d6]">
+    <Link href={`/showcase/${product.id}`} className="group block h-full">
+      <div className="group relative h-full flex flex-col overflow-hidden rounded-[42px] bg-white transition-all duration-700 hover:-translate-y-3 hover:shadow-[0_40px_80px_rgba(6,95,70,0.12),0_0_30px_rgba(16,185,129,0.05)] border border-emerald-50/50">
+        
+        {/* Image Hub */}
+        <div className="relative aspect-[4/3] overflow-hidden bg-slate-50/50">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)] from-emerald-50/40" />
+          
           {imageUrl ? (
             <Image
               src={imageUrl}
               alt={product.productName}
               fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              className="object-contain p-6 transition-transform duration-1000 group-hover:scale-110"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Package size={48} className="text-slate-300 dark:text-slate-600" />
+            <div className="absolute inset-0 flex items-center justify-center bg-emerald-50/20">
+              <Package size={56} strokeWidth={1} className="text-emerald-200" />
             </div>
           )}
 
-          {/* Overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          {/* Quick view on hover */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-            <span className="flex items-center gap-2 rounded-full bg-[rgba(255,248,240,0.92)] px-4 py-2 text-xs font-semibold text-[var(--nv-ink)] shadow-lg backdrop-blur-sm">
-              <Eye size={14} />
-              Xem chi tiết
-            </span>
-          </div>
-
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-            <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${getProductTypeBadge(product.productType)}`}>
+          {/* Frosted Type Badge */}
+          <div className="absolute top-5 left-5 z-10">
+            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] backdrop-blur-md border border-white/40 shadow-sm transition-colors duration-500 ${getProductTypeBadge(product.productType)}`}>
               {getProductTypeLabel(product.productType)}
             </span>
-            {!isActive && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400">
-                Ngừng KD
-              </span>
-            )}
           </div>
 
-          {/* Featured star */}
-          {product.isFeatured && (
-            <div className="absolute top-3 right-3">
-              <div className="w-7 h-7 rounded-full bg-amber-400 flex items-center justify-center shadow-lg">
-                <Star size={14} className="text-white fill-white" />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="p-4">
-          {/* Category */}
-          {product.category && (
-            <div className="flex items-center gap-1 mb-2">
-              <Tag size={11} className="text-[var(--nv-gold)]" />
-              <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--nv-sage)]">
-                {product.category.categoryName}
+          {/* High-End Quick Actions Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center bg-emerald-950/5 opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-[2px]">
+            <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out">
+              <span className="flex items-center gap-2 rounded-full bg-emerald-900 px-6 py-3 text-xs font-bold text-white shadow-2xl hover:bg-black transition-colors">
+                <Eye size={16} />
+                Khám phá ngay
               </span>
             </div>
-          )}
+          </div>
+        </div>
 
-          {/* Name */}
-          <h3 className="mb-3 text-sm font-semibold leading-snug text-[var(--nv-ink)] transition-colors duration-200 line-clamp-2 group-hover:text-[var(--nv-sage-strong)]">
+        {/* Info Area */}
+        <div className="p-7 flex flex-col flex-grow">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-800/60 font-nunito">
+              {product.category?.categoryName || "Sản phẩm Nam Việt"}
+            </span>
+          </div>
+
+          <h3 className="mb-6 text-base font-bold leading-tight text-slate-900 line-clamp-2 flex-grow transition-colors group-hover:text-emerald-800">
             {product.productName}
           </h3>
 
-          {/* Price */}
-          <div className="flex items-end justify-between">
-            <div>
+          <div className="flex items-center justify-between pt-6 border-t border-emerald-50/60">
+            <div className="flex flex-col">
               {product.sellingPriceRetail ? (
-                <div>
-                  <p className="mb-0.5 text-xs text-[var(--nv-muted)]">Giá bán lẻ</p>
-                  <p className="text-base font-bold text-[var(--nv-sage-strong)]">
-                    {formatPrice(product.sellingPriceRetail)}
-                  </p>
-                </div>
+                <span className="text-xl font-bold text-emerald-900 font-cormorant tracking-tight">
+                  {formatPrice(product.sellingPriceRetail)}
+                </span>
               ) : (
-                <p className="text-base font-semibold text-[var(--nv-muted)]">Liên hệ báo giá</p>
+                <span className="text-sm font-bold text-slate-400 italic">Liên hệ báo giá</span>
               )}
             </div>
-            <div className="nv-icon-badge rounded-2xl p-2.5 transition-all duration-300 group-hover:bg-[var(--nv-sage-strong)] group-hover:text-white">
-              <ShoppingCart size={16} />
-            </div>
+            
+            <button className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-800 transition-all duration-500 hover:scale-110 active:scale-90 group/btn overflow-hidden">
+               <div className="absolute inset-0 bg-emerald-900 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+               <ShoppingCart size={20} className="relative z-10 group-hover/btn:text-white transition-colors" />
+            </button>
           </div>
         </div>
-
-        {/* Bottom accent */}
-        <div className="nv-accent-line h-0.5 scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100" />
       </div>
     </Link>
   );

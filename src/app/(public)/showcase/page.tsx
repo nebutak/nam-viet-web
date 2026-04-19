@@ -15,15 +15,25 @@ import {
   List,
   X,
   Loader2,
+  Box,
+  Sprout,
+  Gift,
+  ArrowUpDown,
+  ChevronDown,
+  MapPin,
+  Phone,
+  Globe,
+  Mail,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const PRODUCT_TYPES = [
-  { value: "", label: "Tất cả", emoji: "🛍️" },
-  { value: "goods", label: "Hàng hóa", emoji: "📦" },
-  { value: "finished_product", label: "Thành phẩm", emoji: "✨" },
-  { value: "raw_material", label: "Nguyên liệu", emoji: "🌿" },
-  { value: "packaging", label: "Bao bì", emoji: "🎁" },
+  { value: "", label: "Tất cả", icon: <Grid3x3 size={18} /> },
+  { value: "goods", label: "Hàng hóa", icon: <Package size={18} /> },
+  { value: "finished_product", label: "Thành phẩm", icon: <Box size={18} /> },
+  { value: "raw_material", label: "Nguyên liệu", icon: <Sprout size={18} /> },
+  { value: "packaging", label: "Bao bì", icon: <Gift size={18} /> },
 ];
 
 const SORT_OPTIONS = [
@@ -42,6 +52,7 @@ export default function ShowcasePage() {
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const LIMIT = 12;
 
   // Debounce search
@@ -71,74 +82,82 @@ export default function ShowcasePage() {
   return (
     <>
       {/* ── Hero Section ── */}
-      <section className="nv-hero pt-24 pb-28">
-        {/* Background orbs */}
-        <div className="absolute left-[14%] top-10 h-96 w-96 rounded-full bg-[rgba(201,214,192,0.16)] blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-[16%] h-80 w-80 rounded-full bg-[rgba(192,155,108,0.14)] blur-3xl animate-pulse [animation-delay:1s]" />
-        <div className="absolute left-1/2 top-1/2 h-[320px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(255,255,255,0.07)] blur-3xl" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Badge */}
-          <div className="nv-soft-badge mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium backdrop-blur-sm">
-            <Sparkles size={14} className="animate-spin [animation-duration:3s]" />
-            Danh mục sản phẩm Nam Việt
-          </div>
-
-          <h1 className="mb-5 text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl">
-            Sản phẩm{" "}
-            <span className="bg-gradient-to-r from-[#f4ead9] via-[#d8e3d4] to-[#c6a173] bg-clip-text text-transparent">
-              chất lượng cao
+      <section className="relative pt-48 pb-32 overflow-hidden min-h-[700px] flex items-center mt-[-80px]">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <Image 
+            src="/images/hero/rice-fields.png"
+            alt="Cánh đồng lúa Nam Việt"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+          {/* Layered overlays for depth - refined for transparent header */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/10 to-white" />
+          <div className="absolute inset-0 bg-emerald-900/5 backdrop-blur-[0.5px]" />
+        </div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
+          {/* Localized glow behind text to lift it from image */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-white/20 blur-[120px] -z-1" />
+          
+          <h1 className="text-4xl md:text-7xl font-semibold text-slate-950 mb-8 tracking-wide leading-[1.1] drop-shadow-[0_4px_24px_rgba(255,255,255,1)] font-cormorant">
+            Giải pháp sản phẩm<br /> 
+            <span className="font-bold italic bg-gradient-to-r from-emerald-900 to-green-800 bg-clip-text text-transparent pr-4 drop-shadow-sm">
+               chất lượng vượt trội
             </span>
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-[#d6dbd2]">
-            Khám phá bộ sưu tập đa dạng từ nguyên liệu, bao bì đến thành phẩm – đáp ứng mọi nhu cầu sản xuất và thương mại.
-          </p>
 
           {/* Search Hero */}
           <div className="max-w-2xl mx-auto">
-            <div className="nv-hero-panel flex items-center gap-3 rounded-[28px] p-2 backdrop-blur-xl">
-              <Search size={20} className="ml-3 shrink-0 text-[#d1d8cf]" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Tìm kiếm sản phẩm..."
-                className="flex-1 bg-transparent py-1 text-base text-white outline-none placeholder:text-[#c7cfca]"
-                id="showcase-search"
-              />
-              {search && (
-                <button onClick={() => setSearch("")} className="p-1 text-[#c7cfca] transition-colors hover:text-white">
-                  <X size={16} />
-                </button>
-              )}
-              <button className="nv-primary-button shrink-0 rounded-2xl px-5 py-2.5 text-sm font-medium text-white transition-all duration-200">
+            <div className="flex items-center gap-3 p-2 bg-white/95 backdrop-blur-md rounded-3xl border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.08)] focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all">
+              <div className="flex-1 flex items-center gap-3 pl-4">
+                <Search size={22} className="text-emerald-700/40" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Bạn đang tìm sản phẩm gì?..."
+                  className="w-full py-2 bg-transparent text-slate-900 placeholder:text-slate-400 outline-none font-bold"
+                />
+              </div>
+              <button className="px-10 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20 active:scale-95">
                 Tìm kiếm
               </button>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Quick type filters */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
+      {/* ── Category Filters Section ── */}
+      <div className="relative z-20 -mt-10 mb-12 px-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-center">
+          <div className="inline-flex flex-wrap items-center justify-center p-2 bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-slate-100">
             {PRODUCT_TYPES.map((t) => (
               <button
                 key={t.value}
                 onClick={() => setProductType(t.value)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                className={`flex items-center gap-3 px-8 py-4 rounded-[2rem] text-sm font-black tracking-widest uppercase transition-all duration-500 hover:scale-105 active:scale-95 ${
                   productType === t.value
-                    ? "nv-filter-pill-active"
-                    : "nv-filter-pill hover:bg-white/[0.14] hover:text-white"
+                    ? "bg-emerald-600 text-white shadow-xl shadow-emerald-600/20"
+                    : "text-slate-600 hover:text-emerald-900 hover:bg-emerald-50"
                 }`}
               >
-                <span>{t.emoji}</span> {t.label}
+                <span className={`${productType === t.value ? "text-emerald-200" : "text-emerald-700/40"}`}>
+                  {t.icon}
+                </span> 
+                {t.label}
               </button>
             ))}
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* ── Stats Bar ── */}
-      <div className="relative z-10 -mt-8 px-4 sm:px-6 lg:px-8">
-        <div className="nv-soft-card mx-auto max-w-7xl rounded-[28px] px-6 py-4">
+      {/* ── Product List Section ── */}
+      <section className="bg-white pb-20">
+        {/* ── Stats Bar ── */}
+        <div className="relative z-10 -mt-8 px-4 sm:px-6 lg:px-8">
+          <div className="bg-white mx-auto max-w-7xl rounded-[28px] px-6 py-4 shadow-xl border border-emerald-50">
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex items-center gap-2 text-sm text-[var(--nv-muted)]">
               <Package size={16} className="text-[var(--nv-gold)]" />
@@ -153,16 +172,45 @@ export default function ShowcasePage() {
 
             {/* Spacer */}
             <div className="ml-auto flex items-center gap-3">
-              {/* Sort */}
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                className="rounded-xl border border-[var(--nv-border)] bg-[rgba(255,255,255,0.88)] px-3 py-2 text-sm text-[var(--nv-ink)] outline-none focus:ring-4 focus:ring-[rgba(113,136,111,0.12)]"
-              >
-                {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
+              {/* Custom Sort Dropdown */}
+              <div className="relative sort-dropdown">
+                <button
+                  onClick={() => setIsSortOpen(!isSortOpen)}
+                  className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-white/90 backdrop-blur-md px-4 py-2.5 text-sm font-black text-emerald-900 shadow-sm transition-all hover:bg-white hover:shadow-md active:scale-95"
+                >
+                  <ArrowUpDown size={14} className="text-emerald-600" />
+                  <span>{SORT_OPTIONS.find(o => o.value === sort)?.label}</span>
+                  <ChevronDown size={14} className={`transition-transform duration-300 ${isSortOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {isSortOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsSortOpen(false)} 
+                    />
+                    <div className="absolute right-0 mt-2 w-48 z-50 overflow-hidden rounded-2xl border border-emerald-50 bg-white p-1.5 shadow-2xl animate-in fade-in zoom-in duration-200">
+                      {SORT_OPTIONS.map((o) => (
+                        <button
+                          key={o.value}
+                          onClick={() => {
+                            setSort(o.value);
+                            setIsSortOpen(false);
+                          }}
+                          className={`flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${
+                            sort === o.value 
+                              ? "bg-emerald-50 text-emerald-700" 
+                              : "text-slate-600 hover:bg-slate-50 hover:text-emerald-900"
+                          }`}
+                        >
+                          {o.label}
+                          {sort === o.value && <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
 
               {/* View mode */}
               <div className="flex items-center overflow-hidden rounded-xl border border-[var(--nv-border)] bg-white/80">
@@ -267,7 +315,6 @@ export default function ShowcasePage() {
                       </div>
                     ))}
                 </div>
-
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page >= totalPages}
@@ -280,27 +327,95 @@ export default function ShowcasePage() {
           </>
         )}
       </div>
+      </section>
 
-      {/* ── CTA ── */}
-      <section className="px-4 pb-6 pt-4 sm:px-6 lg:px-8">
-        <div className="nv-hero mx-auto max-w-7xl rounded-[36px] px-6 py-16 text-center shadow-[0_28px_80px_rgba(19,29,24,0.18)]">
-          <h2 className="text-3xl font-bold text-white mb-4">Cần tư vấn sản phẩm?</h2>
-          <p className="mb-8 text-[#d6dbd2]">
-            Đội ngũ của chúng tôi sẵn sàng hỗ trợ bạn tìm sản phẩm phù hợp nhất
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/community"
-              className="nv-secondary-button rounded-2xl px-6 py-3 font-medium transition-all"
-            >
-              Đọc tin tức & Blog
-            </Link>
-            <a
-              href="mailto:info@namviet.vn"
-              className="nv-outline-button rounded-2xl px-6 py-3 font-semibold transition-all"
-            >
-              Liên hệ ngay
-            </a>
+      {/* ── Contact Information Section ── */}
+      <section className="px-4 pb-24 pt-16 sm:px-6 lg:px-8 bg-white">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col lg:flex-row items-center lg:items-stretch justify-between gap-12 bg-slate-50/70 rounded-[48px] p-8 lg:p-12 shadow-sm border border-slate-100 transition-all">
+            
+            {/* Left: Branding Column */}
+            <div className="flex flex-col items-center justify-center text-center space-y-6 lg:w-[35%] py-4">
+               <div className="relative w-28 h-28 md:w-32 md:h-32 transition-transform duration-500 hover:scale-105">
+                 <Image 
+                    src="/images/logo/logo-nobackground.png" 
+                    alt="Logo Nam Việt" 
+                    fill
+                    className="object-contain"
+                    priority
+                 />
+               </div>
+
+               <div className="space-y-3">
+                 <div className="flex flex-col items-center">
+                   <h3 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight">
+                     CÔNG TY NAM VIỆT
+                   </h3>
+                   <p className="text-[10px] md:text-xs font-bold text-slate-400 tracking-[0.4em] uppercase mt-2">
+                     Nông nghiệp xanh
+                   </p>
+                 </div>
+               </div>
+            </div>
+
+            {/* Right: Contact Details Stacked Card */}
+            <div className="lg:w-[65%] w-full flex flex-col justify-center">
+              <div className="bg-slate-50/50 rounded-3xl border border-slate-100 overflow-hidden divide-y divide-slate-100/80">
+                
+                {/* Address */}
+                <div className="flex items-stretch group hover:bg-white transition-colors">
+                  <div className="w-[120px] sm:w-[140px] bg-slate-50/80 p-4 border-r border-slate-100 flex flex-col items-center justify-center text-center group-hover:bg-emerald-50/30 transition-colors">
+                     <MapPin size={18} className="text-slate-500 mb-1" />
+                     <span className="text-[11px] font-bold text-slate-700 uppercase leading-tight">Địa<br/>chỉ</span>
+                  </div>
+                  <div className="flex-1 p-4 sm:p-5 flex items-center">
+                    <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                      Quốc Lộ 30, Ấp Đông Mỹ, Xã Mỹ Hội, Huyện Cao Lãnh, Tỉnh Đồng Tháp.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Hotline */}
+                <div className="flex items-stretch group hover:bg-white transition-colors">
+                  <div className="w-[120px] sm:w-[140px] bg-slate-50/80 p-4 border-r border-slate-100 flex flex-col items-center justify-center text-center group-hover:bg-emerald-50/30 transition-colors">
+                     <Phone size={18} className="text-slate-500 mb-1" />
+                     <span className="text-[11px] font-bold text-slate-700 uppercase leading-none">Hotline</span>
+                  </div>
+                  <div className="flex-1 p-4 sm:p-5 flex items-center">
+                    <a href="tel:0886357788" className="text-[15px] sm:text-base font-black text-emerald-600 hover:text-emerald-700 transition-colors">
+                      088 635 7788 - 0868 759 588
+                    </a>
+                  </div>
+                </div>
+
+                {/* Website */}
+                <div className="flex items-stretch group hover:bg-white transition-colors">
+                  <div className="w-[120px] sm:w-[140px] bg-slate-50/80 p-4 border-r border-slate-100 flex flex-col items-center justify-center text-center group-hover:bg-emerald-50/30 transition-colors">
+                     <Globe size={18} className="text-slate-500 mb-1" />
+                     <span className="text-[11px] font-bold text-slate-700 uppercase leading-none">Website</span>
+                  </div>
+                  <div className="flex-1 p-4 sm:p-5 flex items-center">
+                    <a href="https://hoasinhnamviet.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-500 font-medium hover:text-emerald-700 transition-colors">
+                      https://hoasinhnamviet.com/
+                    </a>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="flex items-stretch group hover:bg-white transition-colors">
+                  <div className="w-[120px] sm:w-[140px] bg-slate-50/80 p-4 border-r border-slate-100 flex flex-col items-center justify-center text-center group-hover:bg-emerald-50/30 transition-colors">
+                     <Mail size={18} className="text-slate-500 mb-1" />
+                     <span className="text-[11px] font-bold text-slate-700 uppercase leading-none">Email</span>
+                  </div>
+                  <div className="flex-1 p-4 sm:p-5 flex items-center">
+                    <a href="mailto:hoasinhnamviet@gmail.com" className="text-sm text-slate-500 font-medium hover:text-emerald-700 transition-colors">
+                      hoasinhnamviet@gmail.com
+                    </a>
+                  </div>
+                </div>
+
+              </div>
+            </div>
           </div>
         </div>
       </section>
