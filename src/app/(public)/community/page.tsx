@@ -60,7 +60,7 @@ export default function CommunityPage() {
   const { data: categories = [] } = usePublicNewsCategories({ page: 1, limit: 20 });
 
   const posts = newsResponse?.data || [];
-  const meta = newsResponse?.meta;
+  const meta = newsResponse?.pagination || newsResponse?.meta;
   const totalPages = meta?.totalPages || 1;
 
   return (

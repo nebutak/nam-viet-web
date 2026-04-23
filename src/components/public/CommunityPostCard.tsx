@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Clock, Video, Star, ChevronRight } from "lucide-react";
-import type { News } from "@/hooks/api/useNews";
+import type { News } from "@/hooks/api/usePublicNews";
 
 const API_BASE = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5000";
 
@@ -18,7 +18,7 @@ function formatDate(dateStr: string) {
 function getImageUrl(path?: string) {
   if (!path) return null;
   if (path.startsWith("http")) return path;
-  return `${API_BASE}/${path}`;
+  return path.startsWith("/") ? path : `/${path}`;
 }
 
 interface CommunityPostCardProps {

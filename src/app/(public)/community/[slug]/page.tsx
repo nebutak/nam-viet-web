@@ -3,11 +3,17 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-hot-toast";
 import {
   usePublicNewsBySlug,
   usePublicRelatedNews,
   useIncrementNewsView,
+  usePublicNewsEngagement,
+  useToggleNewsLike,
+  usePublicNewsComments,
+  useCreateNewsComment,
+  useTrackNewsShare,
 } from "@/hooks/api/usePublicNews";
 import CommunityPostCard from "@/components/public/CommunityPostCard";
 import {
@@ -22,6 +28,10 @@ import {
   Loader2,
   Share2,
   Tag,
+  Copy,
+  Facebook,
+  Instagram,
+  Send,
 } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5000";
@@ -43,7 +53,7 @@ function formatCount(n: number) {
 function getImageUrl(path?: string) {
   if (!path) return null;
   if (path.startsWith("http")) return path;
-  return `${API_BASE}/${path}`;
+  return path.startsWith("/") ? path : `/${path}`;
 }
 
 function getVideoUrl(path?: string) {
@@ -57,6 +67,26 @@ export default function CommunityArticlePage() {
   const { data: post, isLoading, isError } = usePublicNewsBySlug(slug);
   const { data: related = [] } = usePublicRelatedNews(post?.id || 0, !!post?.id);
   const incrementView = useIncrementNewsView();
+  const toggleLike = useToggleNewsLike();
+  const createComment = useCreateNewsComment();
+  const trackShare = useTrackNewsShare();
+  const [clientId, setClientId] = useState("");
+  const [commentForm, setCommentForm] = useState({ authorName: "", authorEmail: "", content: "" });
+  const articleUrl = typeof window !== "undefined" ? window.location.href : "";
+  const encodedUrl = useMemo(() => encodeURIComponent(articleUrl), [articleUrl]);
+
+  useEffect(() => {
+    const key = "namviet_news_client_id";
+    let value = window.localStorage.getItem(key);
+    if (!value) {
+      value = `${Date.now()}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}`;
+      window.localStorage.setItem(key, value);
+    }
+    setClientId(value);
+  }, []);
+
+  const { data: engagement } = usePublicNewsEngagement(post?.id || 0, clientId, !!post?.id && !!clientId);
+  const { data: comments = [] } = usePublicNewsComments(post?.id || 0, !!post?.id);
 
   // Auto increment view count
   useEffect(() => {
@@ -95,6 +125,47 @@ export default function CommunityArticlePage() {
   const videoUrl = getVideoUrl(post.videoFile);
   const thumbUrl = getImageUrl(post.videoThumbnail);
   const isVideo = post.contentType === "video";
+  const displayCounts = {
+    viewCount: engagement?.viewCount ?? post.viewCount ?? 0,
+    likeCount: engagement?.likeCount ?? post.likeCount ?? 0,
+    commentCount: engagement?.commentCount ?? post.commentCount ?? 0,
+    shareCount: engagement?.shareCount ?? post.shareCount ?? 0,
+  };
+  const handleLike = async () => {
+    if (!clientId) return;
+    await toggleLike.mutateAsync({ id: post.id, clientId });
+  };
+
+  const handleShare = async (platform: "facebook" | "copy_link" | "instagram" | "native") => {
+    await trackShare.mutateAsync({ id: post.id, platform, clientId: clientId || undefined });
+
+    if (platform === "facebook") {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    if (platform === "copy_link") {
+      await navigator.clipboard.writeText(articleUrl);
+      toast.success("Đã copy link bài viết");
+      return;
+    }
+
+    if (platform === "instagram") {
+      await navigator.clipboard.writeText(articleUrl);
+      window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+      toast.success("Đã copy link. Instagram không hỗ trợ chia sẻ trực tiếp từ web.");
+      return;
+    }
+
+    await navigator.share?.({ title: post.title, url: articleUrl });
+  };
+
+  const handleSubmitComment = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    await createComment.mutateAsync({ id: post.id, data: commentForm });
+    setCommentForm({ authorName: "", authorEmail: "", content: "" });
+    toast.success("Bình luận đã được gửi và đang chờ duyệt");
+  };
 
   return (
     <>
@@ -180,21 +251,40 @@ export default function CommunityArticlePage() {
               </span>
               <div className="flex items-center gap-4 ml-auto">
                 <span className="flex items-center gap-1">
-                  <Eye size={13} /> {formatCount(post.viewCount)}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Heart size={13} /> {formatCount(post.likeCount)}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MessageCircle size={13} /> {formatCount(post.commentCount)}
+                  <Eye size={13} /> {formatCount(displayCounts.viewCount)}
                 </span>
                 <button
-                  onClick={() => navigator.share?.({ title: post.title, url: window.location.href })}
-                  className="flex items-center gap-1 text-[var(--nv-sage)] transition-colors hover:text-[var(--nv-sage-strong)]"
+                  type="button"
+                  onClick={handleLike}
+                  disabled={toggleLike.isPending}
+                  className={`flex items-center gap-1 transition-colors hover:text-red-500 ${engagement?.liked ? "text-red-500" : ""}`}
                 >
-                  <Share2 size={13} />
+                  <Heart size={13} className={engagement?.liked ? "fill-current" : ""} /> {formatCount(displayCounts.likeCount)}
                 </button>
+                <span className="flex items-center gap-1">
+                  <MessageCircle size={13} /> {formatCount(displayCounts.commentCount)}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Share2 size={13} /> {formatCount(displayCounts.shareCount)}
+                </span>
               </div>
+            </div>
+
+            <div className="mb-8 flex flex-wrap items-center gap-2">
+              <button onClick={() => handleShare("facebook")} className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100">
+                <Facebook size={15} /> Facebook
+              </button>
+              <button onClick={() => handleShare("copy_link")} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50">
+                <Copy size={15} /> Copy link
+              </button>
+              <button onClick={() => handleShare("instagram")} className="inline-flex items-center gap-2 rounded-xl border border-pink-200 bg-pink-50 px-3 py-2 text-sm font-semibold text-pink-700 transition-colors hover:bg-pink-100">
+                <Instagram size={15} /> Instagram
+              </button>
+              {typeof navigator !== "undefined" && Boolean(navigator.share) && (
+                <button onClick={() => handleShare("native")} className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100">
+                  <Share2 size={15} /> Chia sẻ
+                </button>
+              )}
             </div>
 
             {/* Video Player */}
@@ -219,6 +309,64 @@ export default function CommunityArticlePage() {
                 __html: post.content ? post.content.replace(/src="\/uploads/g, `src="${API_BASE}/uploads`) : ""
               }}
             />
+
+            <section className="mt-10 border-t border-slate-200 pt-8">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-slate-900">Bình luận</h2>
+                <span className="text-sm font-semibold text-slate-500">{comments.length} đã duyệt</span>
+              </div>
+
+              <form onSubmit={handleSubmitComment} className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input
+                    value={commentForm.authorName}
+                    onChange={(e) => setCommentForm((prev) => ({ ...prev, authorName: e.target.value }))}
+                    placeholder="Tên của bạn"
+                    required
+                    className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-600"
+                  />
+                  <input
+                    value={commentForm.authorEmail}
+                    onChange={(e) => setCommentForm((prev) => ({ ...prev, authorEmail: e.target.value }))}
+                    placeholder="Email (không bắt buộc)"
+                    type="email"
+                    className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-600"
+                  />
+                </div>
+                <textarea
+                  value={commentForm.content}
+                  onChange={(e) => setCommentForm((prev) => ({ ...prev, content: e.target.value }))}
+                  placeholder="Viết bình luận..."
+                  required
+                  rows={4}
+                  className="mt-3 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-600"
+                />
+                <button
+                  type="submit"
+                  disabled={createComment.isPending}
+                  className="mt-3 inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 disabled:opacity-60"
+                >
+                  <Send size={15} /> {createComment.isPending ? "Đang gửi..." : "Gửi bình luận"}
+                </button>
+              </form>
+
+              <div className="space-y-4">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="rounded-2xl border border-slate-200 bg-white p-4">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <div className="font-semibold text-slate-900">{comment.authorName}</div>
+                      <time className="text-xs text-slate-500">{formatDate(comment.createdAt)}</time>
+                    </div>
+                    <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">{comment.content}</p>
+                  </div>
+                ))}
+                {comments.length === 0 && (
+                  <p className="rounded-2xl border border-dashed border-slate-200 p-5 text-center text-sm text-slate-500">
+                    Chưa có bình luận được duyệt.
+                  </p>
+                )}
+              </div>
+            </section>
 
             {/* Tags from newsTagRelations */}
             {post.newsTagRelations && post.newsTagRelations.length > 0 && (
@@ -255,9 +403,10 @@ export default function CommunityArticlePage() {
                 <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Thống kê</h4>
                 <div className="space-y-3">
                   {[
-                    { icon: <Eye size={15} className="text-[var(--nv-gold)]" />, label: "Lượt xem", value: formatCount(post.viewCount) },
-                    { icon: <Heart size={15} className="text-red-400" />, label: "Yêu thích", value: formatCount(post.likeCount) },
-                    { icon: <MessageCircle size={15} className="text-[var(--nv-sage)]" />, label: "Bình luận", value: formatCount(post.commentCount) },
+                    { icon: <Eye size={15} className="text-[var(--nv-gold)]" />, label: "Lượt xem", value: formatCount(displayCounts.viewCount) },
+                    { icon: <Heart size={15} className="text-red-400" />, label: "Yêu thích", value: formatCount(displayCounts.likeCount) },
+                    { icon: <MessageCircle size={15} className="text-[var(--nv-sage)]" />, label: "Bình luận", value: formatCount(displayCounts.commentCount) },
+                    { icon: <Share2 size={15} className="text-blue-400" />, label: "Chia sẻ", value: formatCount(displayCounts.shareCount) },
                   ].map((stat) => (
                     <div key={stat.label} className="flex items-center justify-between">
                       <span className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
@@ -271,7 +420,7 @@ export default function CommunityArticlePage() {
 
               {/* Share */}
               <button
-                onClick={() => navigator.share?.({ title: post.title, url: window.location.href })}
+                onClick={() => handleShare("native")}
                 className="nv-primary-button flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-medium text-white transition-all"
               >
                 <Share2 size={15} /> Chia sẻ bài viết
