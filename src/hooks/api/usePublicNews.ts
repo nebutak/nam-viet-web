@@ -186,6 +186,9 @@ export function useCreateNewsComment() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: publicNewsKeys.comments(variables.id) });
+      queryClient.invalidateQueries({ queryKey: publicNewsKeys.engagement(variables.id) });
+      queryClient.invalidateQueries({ queryKey: publicNewsKeys.details() });
+      queryClient.invalidateQueries({ queryKey: publicNewsKeys.lists() });
     },
   });
 }

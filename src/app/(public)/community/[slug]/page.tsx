@@ -164,7 +164,7 @@ export default function CommunityArticlePage() {
     event.preventDefault();
     await createComment.mutateAsync({ id: post.id, data: commentForm });
     setCommentForm({ authorName: "", authorEmail: "", content: "" });
-    toast.success("Bình luận đã được gửi và đang chờ duyệt");
+    toast.success("Bình luận đã được đăng thành công");
   };
 
   return (
@@ -313,7 +313,7 @@ export default function CommunityArticlePage() {
             <section className="mt-10 border-t border-slate-200 pt-8">
               <div className="mb-5 flex items-center justify-between">
                 <h2 className="text-xl font-bold text-slate-900">Bình luận</h2>
-                <span className="text-sm font-semibold text-slate-500">{comments.length} đã duyệt</span>
+                <span className="text-sm font-semibold text-slate-500">{comments.length} bình luận</span>
               </div>
 
               <form onSubmit={handleSubmitComment} className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -362,7 +362,7 @@ export default function CommunityArticlePage() {
                 ))}
                 {comments.length === 0 && (
                   <p className="rounded-2xl border border-dashed border-slate-200 p-5 text-center text-sm text-slate-500">
-                    Chưa có bình luận được duyệt.
+                    Chưa có bình luận nào.
                   </p>
                 )}
               </div>
